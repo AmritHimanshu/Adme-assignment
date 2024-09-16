@@ -37,9 +37,7 @@ function ImageContainer() {
   const getImages = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(
-        `${BaseUrl}?page=${page}&limit=${limit}`
-      );
+      const res = await fetch(`${BaseUrl}?page=${page}&limit=${limit}`);
       const data = await res.json();
       setImages((img) => [...img, ...data]);
       setIsLoading(false);
@@ -51,7 +49,10 @@ function ImageContainer() {
   };
 
   const handleScroll = debounce(() => {
-    if ( document.documentElement.clientHeight + window.pageYOffset >= (document.documentElement.scrollHeight - 500) ) {
+    if (
+      document.documentElement.clientHeight + window.pageYOffset >=
+      document.documentElement.scrollHeight - 500
+    ) {
       page = page + 1;
       getImages();
     }
