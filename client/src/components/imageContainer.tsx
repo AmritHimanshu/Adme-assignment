@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Image from "./image";
+import { ReactComponent as Loading } from "./Loading.svg";
 
-export type image = {
+export type imageInterface = {
   author: string;
   download_url: string;
   height: Number;
@@ -10,32 +11,49 @@ export type image = {
   width: Number;
 };
 
-function ImageContainer() {
-  const [images, setImages] = useState<image[]>([]);
+function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeout: ReturnType<typeof setTimeout>;
 
-  let limit = 50;
+  return (...args: Parameters<T>) => {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+}
+
+function ImageContainer() {
+  const [images, setImages] = useState<imageInterface[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  let limit = 20;
   let page = 1;
 
   const getImages = async () => {
     try {
+      setIsLoading(true);
       const res = await fetch(
         `https://picsum.photos/v2/list?page=${page}&limit=${limit}`
       );
       const data = await res.json();
-      // console.log(data);
-      setImages(data);
+      setImages((img) => [...img, ...data]);
+      setIsLoading(false);
     } catch (error) {
       console.log(error);
       window.alert(error);
+      setIsLoading(false);
     }
   };
 
-  const handleScroll = () => {
-    if (document.documentElement.clientHeight + window.pageYOffset >= document.documentElement.scrollHeight) {
-        page = page + 1;
-        getImages();
+  const handleScroll = debounce(() => {
+    if ( document.documentElement.clientHeight + window.pageYOffset >= (document.documentElement.scrollHeight - 500) ) {
+      page = page + 1;
+      getImages();
     }
-  };
+  }, 500);
 
   useEffect(() => {
     getImages();
@@ -47,11 +65,15 @@ function ImageContainer() {
   }, []);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 place-items-center space-y-">
-      {images?.map((image) => (
-        <Image key={image?.id} source={image.download_url} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 place-items-center">
+        {images?.map((image) => (
+          <Image key={image?.id} source={image.download_url} />
+        ))}
+      </div>
+
+      {isLoading && <Loading className="w-[100px] m-auto" />}
+    </>
   );
 }
 
