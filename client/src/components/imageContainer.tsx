@@ -26,6 +26,8 @@ function debounce<T extends (...args: any[]) => void>(
 }
 
 function ImageContainer() {
+  const BaseUrl = process.env.REACT_APP_BASE_URL;
+
   const [images, setImages] = useState<imageInterface[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -36,7 +38,7 @@ function ImageContainer() {
     try {
       setIsLoading(true);
       const res = await fetch(
-        `https://picsum.photos/v2/list?page=${page}&limit=${limit}`
+        `${BaseUrl}?page=${page}&limit=${limit}`
       );
       const data = await res.json();
       setImages((img) => [...img, ...data]);
