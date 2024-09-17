@@ -40,7 +40,9 @@ function ImageContainer() {
       const res = await fetch(`${BaseUrl}?page=${page}&limit=${limit}`);
       const data = await res.json();
       setImages((img) => [...img, ...data]);
-      setIsLoading(false);
+      setTimeout(()=>{
+        setIsLoading(false);
+      },1000);
     } catch (error) {
       console.log(error);
       window.alert(error);
